@@ -1,23 +1,21 @@
-/* eslint-disable no-unused-vars */
 import express from 'express';
-import bookRouter from './routes/book.router.js';
-import { conectToDB } from './config/db_conection_mongodb.js';
-import autorRouter from './routes/autor.router.js';
-import mongoose from 'mongoose';
-import manipuladorDeErros from './middlewars/manipuladorDeErros.js';
+import { mongoConnection } from './config/db_conection_mongodb.js';
+
+import appRouter from './app-router.js';
+import filtersMiddleware from './middlewars/filters-middleware.js';
+import pageNotFoundMiddleware from './middlewars/page-not-found-middleware.js';
 
 export const app = express();
 app.use(express.json());
-const conectDb = await conectToDB();
-conectDb.on('erro', (erro) => console.log('erro de conexão', erro));
-conectDb.once('open', () =>
-  console.log('Conexão com o banco feita com sucesso')
-);
 
-app.use('/books', bookRouter);
-app.use('/authors', autorRouter);
-app.use(manipuladorDeErros);
+const conn = await mongoConnection();
+conn.on('erro', (erro) => console.log('erro de conexão', erro.message));
+
+app.use('/api', appRouter);
+app.use(filtersMiddleware);
+app.use(pageNotFoundMiddleware);
 
 const port = process.env.PORT;
-app.listen(port);
-console.log(`Porta ${port}`);
+app.listen(port, () => {
+  console.log('Server is running');
+});
