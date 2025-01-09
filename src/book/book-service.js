@@ -15,6 +15,11 @@ class BookService {
     if (!page)
       throw new BadRequestException('Quantidade de páginas é obrigatória');
 
+    if (page < 10 || page > 5000)
+      throw new BadRequestException(
+        'Quantidade de páginas deve estár entre 10 e 5000'
+      );
+
     if (!author) throw new BadRequestException('ID do autor é obrigatório');
     await authorService.findOne(author);
 
@@ -31,6 +36,10 @@ class BookService {
     }
 
     return await bookRepository.findOne(id);
+  }
+
+  async findByQueries(query) {
+    return await bookRepository.findByQueries(query);
   }
 
   async update(id, data) {

@@ -18,7 +18,9 @@ const Book = new Schema(
     },
 
     page: {
-      type: Number
+      type: Number,
+      min: [10, 'O numero de páginas deve estar entre 10 e 5000'],
+      max: [5000, 'O numero de páginas deve estar entre 10 e 5000']
     },
 
     author: {

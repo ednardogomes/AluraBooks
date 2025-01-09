@@ -7,7 +7,14 @@ class BookRepository {
   }
 
   async find() {
-    const books = await Book.find();
+    const books = await Book.find().populate('author');
+    if (books.length > 0) return books;
+
+    throw new NotFoundException('Nenhum registro encontrado');
+  }
+
+  async findByQueries(query = {}) {
+    const books = await Book.find(query).populate('author'); // Aplica os filtros diretamente
     if (books.length > 0) return books;
 
     throw new NotFoundException('Nenhum registro encontrado');
@@ -22,9 +29,9 @@ class BookRepository {
 
   async update(id, data) {
     const book = await this.findOne(id);
-    await Book.updateOne(
+    await Book.findOneAndUpdate(
       {
-        id
+        _id: id
       },
       {
         $set: {
@@ -36,8 +43,7 @@ class BookRepository {
         }
       }
     );
-
-    return this.find(id);
+    return 'Book updated';
   }
 
   async delete(id) {
