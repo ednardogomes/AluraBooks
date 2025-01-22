@@ -1,3 +1,4 @@
+import { BadRequestException } from '../exceptions/bad-request-exception.js';
 import { NotFoundException } from '../exceptions/not-found-exception.js';
 import Book from './models/book.js';
 
@@ -7,12 +8,17 @@ class BookRepository {
   }
 
   async find(limit, page) {
-    const books = await Book.find()
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .populate('author')
-      .exec();
-    if (books.length > 0) return books;
+    if (limit > 0 && page > 0) {
+      const books = await Book.find()
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate('author')
+        .exec();
+      if (books.length > 0) return books;
+    }
+    if (limit < 0 || page < 0) {
+      throw new BadRequestException('Parâmetro de páginas deve ser positivo');
+    }
 
     throw new NotFoundException('Nenhum registro encontrado');
   }
