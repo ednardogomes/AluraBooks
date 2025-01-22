@@ -6,15 +6,19 @@ class BookRepository {
     return await Book.create(data);
   }
 
-  async find() {
-    const books = await Book.find().populate('author');
+  async find(limit, page) {
+    const books = await Book.find()
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate('author')
+      .exec();
     if (books.length > 0) return books;
 
     throw new NotFoundException('Nenhum registro encontrado');
   }
 
   async findByQueries(query = {}) {
-    const books = await Book.find(query).populate('author'); // Aplica os filtros diretamente
+    const books = await Book.find(query).populate('author');
     if (books.length > 0) return books;
 
     throw new NotFoundException('Nenhum registro encontrado');

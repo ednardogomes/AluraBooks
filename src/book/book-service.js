@@ -26,8 +26,8 @@ class BookService {
     return bookRepository.create(data);
   }
 
-  async find() {
-    return await bookRepository.find();
+  async find(limit, page) {
+    return await bookRepository.find(limit, page);
   }
 
   async findOne(id) {
