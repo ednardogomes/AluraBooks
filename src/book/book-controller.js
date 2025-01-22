@@ -47,35 +47,44 @@ class BookController {
 
       const titleRegex = new RegExp(title, 'i');
 
+      const authorRegex = new RegExp(authorName, 'i');
+
+      const publisherRegex = new RegExp(publisher, 'i');
+
+      const authorData = await author.findOne({ name: authorRegex });
+
       let search = {};
+
+      if (!authorName) {
+        search = null;
+      }
 
       if (!search) {
         res.status(200).send([]);
       }
 
-      if (title) search.title = titleRegex;
-      if (publisher) search.publisher = publisher;
-
-      if (minPage || maxPage) search.page = {};
-
-      if (minPage) search.page.$gte = minPage;
-      if (maxPage) search.page.$lte = maxPage;
+      if (!authorData) {
+        res.status(200).send([]);
+      }
 
       if (authorName) {
-        const authorData = await author.findOne({ name: authorName });
-        const authorId = authorData.id;
-        search.author = authorId;
+        if (title) search.title = titleRegex;
+
+        if (publisher) search.publisher = publisherRegex;
+
+        if (minPage || maxPage) search.page = {};
+
+        if (minPage) search.page.$gte = minPage;
+        if (maxPage) search.page.$lte = maxPage;
+
+        if (authorData) {
+          const authorId = authorData.id;
+          search.author = authorId;
+        }
+        const book = await bookService.findByQueries(search);
+
+        res.json(book);
       }
-
-      const testeIf = () => console.log('entrei no if');
-      if (author === '') {
-        search.author = null;
-      }
-
-      console.log(search);
-      const book = await bookService.findByQueries(search);
-
-      res.json(book);
     } catch (error) {
       next(error);
     }
