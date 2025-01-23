@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import author from '../author/models/author.js';
 import bookService from './book-service.js';
+import book from './models/book.js';
 
 class BookController {
   async create(req, res, next) {
@@ -42,11 +43,11 @@ class BookController {
       const search = await processSearch(req.query);
 
       if (!search) {
-        res.status(200).send([]);
+        return res.status(200).send([]);
       }
       const book = await bookService.findByQueries(search);
 
-      res.json(book);
+      return res.json(book);
     } catch (error) {
       next(error);
     }
@@ -79,6 +80,8 @@ class BookController {
 async function processSearch(querys) {
   const { title, publisher, minPage, maxPage, author: authorName } = querys;
 
+  let search = {};
+
   const titleRegex = new RegExp(title, 'i');
 
   const authorRegex = new RegExp(authorName, 'i');
@@ -87,28 +90,24 @@ async function processSearch(querys) {
 
   const authorData = await author.findOne({ name: authorRegex });
 
-  let search = {};
-
-  if (!authorName || !authorData) {
+  if (!authorName) {
     search = null;
   }
 
   if (authorName) {
-    if (title) search.title = titleRegex;
-
-    if (publisher) search.publisher = publisherRegex;
-
-    if (minPage || maxPage) search.page = {};
-
-    if (minPage) search.page.$gte = minPage;
-    if (maxPage) search.page.$lte = maxPage;
-
-    if (authorData) {
-      const authorId = authorData.id;
-      search.author = authorId;
-    }
+    const authorId = authorData.id;
+    search.author = authorId;
   }
-  console.log(search);
+
+  if (title) search.title = titleRegex;
+
+  if (publisher) search.publisher = publisherRegex;
+
+  if (minPage || maxPage) search.page = {};
+
+  if (minPage) search.page.$gte = minPage;
+  if (maxPage) search.page.$lte = maxPage;
+
   return search;
 }
 
