@@ -7,13 +7,14 @@ class BookRepository {
     return await Book.create(data);
   }
 
-  async find(limit, page) {
+  async find(limit, page, orderField, order) {
+    const books = await Book.find()
+      .sort({ [orderField]: order })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate('author')
+      .exec();
     if (limit > 0 && page > 0) {
-      const books = await Book.find()
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .populate('author')
-        .exec();
       if (books.length > 0) return books;
     }
     if (limit < 0 || page < 0) {

@@ -17,12 +17,13 @@ class BookController {
 
   async find(req, res, next) {
     try {
-      let { limit = 5, page = 1 } = req.query;
+      let { limit = 5, page = 1, orderField = '_id', order = 1 } = req.query;
 
       limit = parseInt(limit);
       page = parseInt(page);
+      order = parseInt(order);
 
-      const books = await bookService.find(limit, page);
+      const books = await bookService.find(limit, page, orderField, order);
 
       res.json(books);
     } catch (error) {
