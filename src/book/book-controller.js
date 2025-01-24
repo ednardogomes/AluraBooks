@@ -17,7 +17,9 @@ class BookController {
 
   async find(req, res, next) {
     try {
-      let { limit = 5, page = 1, orderField = '_id', order = 1 } = req.query;
+      let { limit = 5, page = 1, ordenation = '_id:-1' } = req.query;
+
+      let [orderField, order] = ordenation.split(':');
 
       limit = parseInt(limit);
       page = parseInt(page);
