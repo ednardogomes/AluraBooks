@@ -1,4 +1,5 @@
 import { SchemaTypes, Schema, model } from 'mongoose';
+import mongooseAutoPopulate from 'mongoose-autopopulate';
 const { String, Number, ObjectId } = SchemaTypes;
 
 const Book = new Schema(
@@ -26,12 +27,14 @@ const Book = new Schema(
     author: {
       type: ObjectId,
       ref: 'author',
-      required: [true, 'O(a) nome do autor(a) é origatório']
+      required: [true, 'O(a) nome do autor(a) é origatório'],
+      autopopulate: true
     }
   },
   {
     versionKey: false
   }
 );
+Book.plugin(mongooseAutoPopulate);
 
 export default model('book', Book);
