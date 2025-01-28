@@ -26,8 +26,8 @@ class BookService {
     return bookRepository.create(data);
   }
 
-  async find(limit, page, orderField, order) {
-    return await bookRepository.find(limit, page, orderField, order);
+  async find() {
+    return bookRepository.find();
   }
 
   async findOne(id) {
@@ -38,8 +38,8 @@ class BookService {
     return await bookRepository.findOne(id);
   }
 
-  async findByQueries(query) {
-    return await bookRepository.findByQueries(query);
+  async findByQueries(querys) {
+    return await bookRepository.findByQueries(querys);
   }
 
   async update(id, data) {

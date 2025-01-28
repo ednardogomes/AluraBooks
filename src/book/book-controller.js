@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import author from '../author/models/author.js';
+import { BadRequestException } from '../exceptions/bad-request-exception.js';
 import bookService from './book-service.js';
 import book from './models/book.js';
 
@@ -17,11 +18,9 @@ class BookController {
 
   async find(req, res, next) {
     try {
-      const books = bookService.find();
+      const books = await bookService.find();
 
-      req.result = books;
-
-      next();
+      res.status(200).json(books);
     } catch (error) {
       next(error);
     }
@@ -42,12 +41,13 @@ class BookController {
     try {
       const search = await processSearch(req.query);
 
-      if (!search) {
-        return res.status(200).send([]);
-      }
+      // if (!search) {
+      //   return res.status(200).send([]);
+      // }
+
       const book = await bookService.findByQueries(search);
 
-      return res.json(book);
+      return res.status(200).json(book);
     } catch (error) {
       next(error);
     }
@@ -78,7 +78,19 @@ class BookController {
 }
 
 async function processSearch(querys) {
-  const { title, publisher, minPage, maxPage, author: authorName } = querys;
+  let {
+    title,
+    publisher,
+    minPage,
+    maxPage,
+    author: authorName,
+    limit,
+    page,
+    orderField,
+    order
+  } = querys;
+
+  // let [orderField, order] = ordenation.split(':');
 
   let search = {};
 
@@ -90,23 +102,41 @@ async function processSearch(querys) {
 
   const authorData = await author.findOne({ name: authorRegex });
 
-  if (!authorName) {
-    search = null;
-  }
-
   if (authorName) {
     const authorId = authorData.id;
     search.author = authorId;
   }
 
-  if (title) search.title = titleRegex;
+  if (title) {
+    search.title = titleRegex;
+  }
 
-  if (publisher) search.publisher = publisherRegex;
+  if (publisher) {
+    search.publisher = publisherRegex;
+  }
 
-  if (minPage || maxPage) search.page = {};
+  if (minPage || maxPage) {
+    search.page = {};
+  }
 
-  if (minPage) search.page.$gte = minPage;
-  if (maxPage) search.page.$lte = maxPage;
+  if (minPage) {
+    search.page.$gte = minPage;
+  }
+  if (maxPage) {
+    search.page.$lte = maxPage;
+  }
+
+  if (limit < 0 || page < 0) {
+    throw new BadRequestException('Não pode ser inserido valores negativos');
+  }
+
+  if (limit) search.limit = limit;
+
+  if (page) search.page = page;
+
+  if (order) search.order = order;
+
+  if (orderField) search.orderField;
 
   return search;
 }
